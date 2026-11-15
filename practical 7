@@ -1,0 +1,98 @@
+
+# Practical 7: Logistic Regression and KNN
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix
+)
+
+# Load dataset
+df = pd.read_csv("iris.csv")
+
+print("First 5 rows:")
+print(df.head())
+
+# Separate input and output
+X = df.drop("species", axis=1)
+y = df["species"]
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Logistic Regression
+log_model = LogisticRegression(max_iter=1000)
+log_model.fit(X_train, y_train)
+
+log_pred = log_model.predict(X_test)
+
+# Logistic Regression Results
+print("\nLOGISTIC REGRESSION RESULTS")
+print("Accuracy:", accuracy_score(y_test, log_pred))
+print("Precision:", precision_score(y_test, log_pred, average="weighted"))
+print("Recall:", recall_score(y_test, log_pred, average="weighted"))
+print("F1 Score:", f1_score(y_test, log_pred, average="weighted"))
+
+# Logistic Regression Confusion Matrix
+cm1 = confusion_matrix(y_test, log_pred, labels=log_model.classes_)
+
+plt.imshow(cm1, cmap="Blues")
+plt.colorbar()
+plt.xticks(range(len(log_model.classes_)), log_model.classes_)
+plt.yticks(range(len(log_model.classes_)), log_model.classes_)
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Logistic Regression Confusion Matrix")
+
+for i in range(len(cm1)):
+    for j in range(len(cm1)):
+        plt.text(j, i, cm1[i, j], ha="center", va="center")
+
+plt.show()
+
+# K-Nearest Neighbors
+knn_model = make_pipeline(
+    StandardScaler(),
+    KNeighborsClassifier(n_neighbors=5)
+)
+
+knn_model.fit(X_train, y_train)
+
+knn_pred = knn_model.predict(X_test)
+
+# KNN Results
+print("\nKNN RESULTS")
+print("Accuracy:", accuracy_score(y_test, knn_pred))
+print("Precision:", precision_score(y_test, knn_pred, average="weighted"))
+print("Recall:", recall_score(y_test, knn_pred, average="weighted"))
+print("F1 Score:", f1_score(y_test, knn_pred, average="weighted"))
+
+# KNN Confusion Matrix
+cm2 = confusion_matrix(y_test, knn_pred, labels=log_model.classes_)
+
+plt.imshow(cm2, cmap="Blues")
+plt.colorbar()
+plt.xticks(range(len(log_model.classes_)), log_model.classes_)
+plt.yticks(range(len(log_model.classes_)), log_model.classes_)
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("KNN Confusion Matrix")
+
+for i in range(len(cm2)):
+    for j in range(len(cm2)):
+        plt.text(j, i, cm2[i, j], ha="center", va="center")
+
+plt.show()
