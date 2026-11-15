@@ -1,0 +1,86 @@
+
+
+facts = {"fever", "cough"}
+
+
+rules = [
+    ({"fever", "cough"}, "flu"),
+    ({"flu"}, "rest"),
+    ({"flu", "body_pain"}, "doctor"),
+    ({"cough"}, "cold"),
+    ({"cold", "fever"}, "infection")
+]
+
+
+
+def forward_chaining(facts, rules):
+
+    facts = set(facts)
+    changed = True
+
+    while changed:
+        changed = False
+
+        for conditions, conclusion in rules:
+
+            if conditions.issubset(facts) and conclusion not in facts:
+
+                facts.add(conclusion)
+                print("Derived:", conclusion)
+                changed = True
+
+    return facts
+
+
+
+def backward_chaining(goal, facts, rules):
+
+    print("Checking:", goal)
+
+   
+    if goal in facts:
+        print(goal, "is already a known fact.")
+        return True
+
+    
+    for conditions, conclusion in rules:
+
+        if conclusion == goal:
+
+            print("Rule found: IF", conditions, "THEN", conclusion)
+
+           
+            for condition in conditions:
+
+                if not backward_chaining(condition, facts, rules):
+                    return False
+
+            print("Therefore,", goal, "is TRUE")
+            return True
+
+    print("Cannot prove:", goal)
+    return False
+
+
+# MAIN PROGRAM
+
+print("----- FORWARD CHAINING -----")
+
+result = forward_chaining(facts, rules)
+
+print("\nFinal Facts:")
+for fact in sorted(result):
+    print("-", fact)
+
+
+print("\n----- BACKWARD CHAINING -----")
+
+goal = "doctor"
+
+print("Goal:", goal)
+print()
+
+if backward_chaining(goal, facts, rules):
+    print("\nFinal Result: Goal is TRUE")
+else:
+    print("\nFinal Result: Goal is FALSE")
