@@ -1,0 +1,143 @@
+
+# Assignment 9: Clustering Techniques
+
+# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.datasets import load_iris
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from scipy.cluster.hierarchy import dendrogram, linkage
+
+print("Libraries imported successfully!")
+
+
+# 2. Load Iris Dataset
+iris = load_iris()
+
+df = pd.DataFrame(iris.data, columns=iris.feature_names)
+df["species"] = iris.target_names[iris.target]
+
+print("\nFirst five records:")
+print(df.head())
+
+print("\nDataset Information:")
+print(df.info())
+
+print("\nDataset Shape:")
+print(df.shape)
+
+
+# 3. Data Preprocessing
+data = df.select_dtypes(include=np.number)
+
+print("\nMissing Values:")
+print(data.isnull().sum())
+
+data = data.dropna()
+
+print("\nData after preprocessing:")
+print(data.head())
+
+
+# 4. Feature Scaling
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(data)
+
+print("\nData scaled successfully!")
+
+
+# 5. Elbow Method
+wcss = []
+
+for i in range(1, 11):
+    kmeans = KMeans(
+        n_clusters=i,
+        random_state=42,
+        n_init=10
+    )
+    kmeans.fit(scaled_data)
+    wcss.append(kmeans.inertia_)
+
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), wcss, marker='o')
+plt.title("Elbow Method")
+plt.xlabel("Number of Clusters")
+plt.ylabel("WCSS")
+plt.grid()
+plt.show()
+
+
+# 6. K-Means Clustering
+kmeans = KMeans(
+    n_clusters=3,
+    random_state=42,
+    n_init=10
+)
+
+df["KMeans_Cluster"] = kmeans.fit_predict(scaled_data)
+
+print("\nK-Means Clustering Results:")
+print(df.head())
+
+print("\nCluster Counts:")
+print(df["KMeans_Cluster"].value_counts())
+
+
+# 7. Visualize K-Means Clusters
+plt.figure(figsize=(8, 5))
+
+sns.scatterplot(
+    x=scaled_data[:, 0],
+    y=scaled_data[:, 1],
+    hue=df["KMeans_Cluster"],
+    palette="Set1",
+    s=70
+)
+
+plt.title("K-Means Clustering")
+plt.xlabel("Sepal Length (Scaled)")
+plt.ylabel("Sepal Width (Scaled)")
+plt.show()
+
+
+# 8. Hierarchical Clustering
+linked = linkage(scaled_data, method='ward')
+
+plt.figure(figsize=(12, 6))
+
+dendrogram(
+    linked,
+    truncate_mode='lastp',
+    p=30
+)
+
+plt.title("Hierarchical Clustering Dendrogram")
+plt.xlabel("Data Points / Clusters")
+plt.ylabel("Euclidean Distance")
+plt.show()
+
+
+# 9. Hierarchical Clustering Visualization
+from sklearn.cluster import AgglomerativeClustering
+
+hc = AgglomerativeClustering(n_clusters=3)
+
+df["Hierarchical_Cluster"] = hc.fit_predict(scaled_data)
+
+print("\nHierarchical Clustering Results:")
+print(df.head())
+
+print("\nHierarchical Cluster Counts:")
+print(df["Hierarchical_Cluster"].value_counts())
+
+
+# 10. Save Clustered Dataset
+df.to_csv("clustered_dataset.csv", index=False)
+
+print("\nClustered dataset saved successfully!")
+
+print("\nAssignment 9 Completed Successfully!")
